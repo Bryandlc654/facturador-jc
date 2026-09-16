@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { LuArrowLeft, LuPlus, LuMapPin, LuMail, LuX, LuCheck, LuSearch } from 'react-icons/lu';
 import api from '../lib/api.js';
 
 const TIPO_COMP = [
@@ -57,6 +58,9 @@ export default function NuevaFactura() {
   const [productos, setProductos] = useState([]);
   const [loadingInit, setLoadingInit] = useState(true);
   const [sending, setSending] = useState(false);
+  const [rucInput, setRucInput] = useState('');
+  const [consultandoRuc, setConsultandoRuc] = useState(false);
+  const [rucError, setRucError] = useState('');
   const [error, setError] = useState('');
 
   const [tipoComprobante, setTipoComprobante] = useState(1);
@@ -86,6 +90,29 @@ export default function NuevaFactura() {
 
   const agregarItem = () => setItems([...items, emptyItem()]);
   const eliminarItem = (i) => { if (items.length > 1) setItems(items.filter((_, idx) => idx !== i)); };
+
+  const consultarRuc = async () => {
+    try {
+      setConsultandoRuc(true); setRucError('');
+      const r = await api.post('/sunat/ruc', { ruc: rucInput });
+      const d = r.data;
+      const existente = clientes.find(c => c.numero_de_documento === rucInput);
+      if (existente) {
+        setClienteId(String(existente.id));
+      } else {
+        const creado = await api.post('/clientes', {
+          tipo_de_documento: '6',
+          numero_de_documento: rucInput,
+          denominacion: d.nombre_o_razon_social,
+          direccion: d.direccion || '',
+        });
+        setClientes(prev => [creado.data, ...prev]);
+        setClienteId(String(creado.data.id));
+      }
+    } catch (err) {
+      setRucError(err.response?.data?.message || 'No se pudo consultar el RUC');
+    } finally { setConsultandoRuc(false); }
+  };
 
   const setItemField = (i, field, value) => {
     const next = items.map((it, idx) => {
@@ -178,10 +205,12 @@ export default function NuevaFactura() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Nuevo Comprobante Electrónico</h1>
-          <p style={{ color: '#6b7280', marginTop: 4 }}>Completa los datos para generar la factura/boleta</p>
+          <p style={{ color: '#888888', marginTop: 4 }}>Completa los datos para generar la factura/boleta</p>
         </div>
         <div className="page-actions">
-          <Link to="/facturas" className="btn btn-secondary">← Volver al listado</Link>
+          <Link to="/facturas" className="btn btn-secondary">
+            <LuArrowLeft size={16} style={{ marginRight: 6 }} /> Volver al listado
+          </Link>
         </div>
       </div>
 
@@ -243,11 +272,29 @@ export default function NuevaFactura() {
             </div>
           </div>
 
+          <div className="row" style={{ alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <div style={{ position: 'relative', flex: 1, maxWidth: 420 }}>
+              <LuSearch size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#888888' }} />
+              <input
+                className="form-input"
+                style={{ paddingLeft: 36 }}
+                placeholder="Cliente nuevo: escribe su RUC (11 dígitos)..."
+                value={rucInput}
+                onChange={(e) => setRucInput(e.target.value.replace(/\D/g, '').slice(0, 11))}
+                disabled={consultandoRuc}
+              />
+            </div>
+            <button type="button" className="btn btn-secondary" onClick={consultarRuc} disabled={consultandoRuc || rucInput.length !== 11}>
+              {consultandoRuc ? <span className="spinner" /> : <LuSearch size={15} style={{ marginRight: 4 }} />} Consultar RUC
+            </button>
+            {rucError && <div style={{ color: '#dc2626', fontSize: 13 }}>{rucError}</div>}
+          </div>
+
           {clienteSel && (
-            <div style={{ background: '#f9fafb', padding: 14, borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
+            <div style={{ background: '#fafafa', padding: 14, borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
               <b>{clienteSel.denominacion}</b>
-              {clienteSel.direccion && <div style={{ color: '#6b7280' }}>📍 {clienteSel.direccion}</div>}
-              {clienteSel.email && <div style={{ color: '#6b7280' }}>✉ {clienteSel.email}</div>}
+              {clienteSel.direccion && <div style={{ color: '#888888', display: 'flex', alignItems: 'center', gap: 6 }}><LuMapPin size={14} /> {clienteSel.direccion}</div>}
+              {clienteSel.email && <div style={{ color: '#888888', display: 'flex', alignItems: 'center', gap: 6 }}><LuMail size={14} /> {clienteSel.email}</div>}
             </div>
           )}
 
@@ -290,7 +337,9 @@ export default function NuevaFactura() {
         <div className="card" style={{ marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h3 style={{ fontSize: 16, fontWeight: 600 }}>Ítems del comprobante</h3>
-            <button type="button" className="btn btn-secondary btn-sm" onClick={agregarItem}>➕ Agregar línea</button>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={agregarItem}>
+              <LuPlus size={16} style={{ marginRight: 6 }} /> Agregar línea
+            </button>
           </div>
 
           <div style={{ overflowX: 'auto' }}>
@@ -348,9 +397,11 @@ export default function NuevaFactura() {
                     </td>
                     <td style={{ fontWeight: 500 }}>S/ {it.subtotal.toFixed(2)}</td>
                     <td>S/ {it.igv.toFixed(2)}</td>
-                    <td style={{ fontWeight: 700, color: '#2563eb' }}>S/ {it.total.toFixed(2)}</td>
+                    <td style={{ fontWeight: 700, color: '#111111' }}>S/ {it.total.toFixed(2)}</td>
                     <td>
-                      <button type="button" className="btn btn-link btn-link-danger" onClick={() => eliminarItem(i)} disabled={items.length === 1}>×</button>
+                      <button type="button" className="btn btn-link btn-link-danger" onClick={() => eliminarItem(i)} disabled={items.length === 1}>
+                        <LuX size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -363,28 +414,28 @@ export default function NuevaFactura() {
           <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Resumen</h3>
           <div style={{ maxWidth: 360, marginLeft: 'auto' }}>
             <div className="row" style={{ marginBottom: 8 }}>
-              <div className="col" style={{ color: '#6b7280' }}>Operación Gravada</div>
+              <div className="col" style={{ color: '#888888' }}>Operación Gravada</div>
               <div className="col" style={{ textAlign: 'right' }}>S/ {totales.gravada.toFixed(2)}</div>
             </div>
             {totales.exonerada > 0 && (
               <div className="row" style={{ marginBottom: 8 }}>
-                <div className="col" style={{ color: '#6b7280' }}>Operación Exonerada</div>
+                <div className="col" style={{ color: '#888888' }}>Operación Exonerada</div>
                 <div className="col" style={{ textAlign: 'right' }}>S/ {totales.exonerada.toFixed(2)}</div>
               </div>
             )}
             {totales.inafecta > 0 && (
               <div className="row" style={{ marginBottom: 8 }}>
-                <div className="col" style={{ color: '#6b7280' }}>Operación Inafecta</div>
+                <div className="col" style={{ color: '#888888' }}>Operación Inafecta</div>
                 <div className="col" style={{ textAlign: 'right' }}>S/ {totales.inafecta.toFixed(2)}</div>
               </div>
             )}
             <div className="row" style={{ marginBottom: 8 }}>
-              <div className="col" style={{ color: '#6b7280' }}>IGV (18%)</div>
+              <div className="col" style={{ color: '#888888' }}>IGV (18%)</div>
               <div className="col" style={{ textAlign: 'right' }}>S/ {totales.igv.toFixed(2)}</div>
             </div>
-            <div className="row" style={{ paddingTop: 12, borderTop: '1px solid #e5e7eb', paddingBottom: 10 }}>
+            <div className="row" style={{ paddingTop: 12, borderTop: '1px solid #e5e5e5', paddingBottom: 10 }}>
               <div className="col" style={{ fontWeight: 700, fontSize: 18 }}>Total</div>
-              <div className="col" style={{ textAlign: 'right', fontWeight: 700, fontSize: 22, color: '#2563eb' }}>
+              <div className="col" style={{ textAlign: 'right', fontWeight: 700, fontSize: 22, color: '#111111' }}>
                 S/ {totales.total.toFixed(2)}
               </div>
             </div>
@@ -396,7 +447,7 @@ export default function NuevaFactura() {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
           <Link to="/facturas" className="btn btn-secondary">Cancelar</Link>
           <button type="submit" className="btn btn-primary" disabled={sending}>
-            {sending ? <span><span className="spinner" style={{ marginRight: 8 }}/>Generando...</span> : '✓ Generar Comprobante'}
+            {sending ? <span><span className="spinner" style={{ marginRight: 8 }}/>Generando...</span> : <span><LuCheck size={16} style={{ marginRight: 6 }} /> Generar Comprobante</span>}
           </button>
         </div>
       </form>

@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { LuPlus, LuReceiptText, LuFileText, LuClipboardList, LuCircleX, LuWallet, LuUsers, LuPackage, LuArrowRight } from 'react-icons/lu';
 import api from '../lib/api.js';
 
 const stats = [
-  { label: 'Total Facturas', key: 'totalFacturas', icon: '🧾', color: '#dbeafe', iconColor: '#2563eb' },
-  { label: 'Total Boletas', key: 'totalBoletas', icon: '📋', color: '#d1fae5', iconColor: '#059669' },
-  { label: 'Anuladas', key: 'totalAnuladas', icon: '❌', color: '#fee2e2', iconColor: '#dc2626' },
-  { label: 'Monto Total', key: 'montoTotal', icon: '💰', color: '#fef3c7', iconColor: '#d97706', prefix: 'S/ ' },
-  { label: 'Clientes', key: 'clientes', icon: '👥', color: '#ede9fe', iconColor: '#7c3aed' },
-  { label: 'Productos', key: 'productos', icon: '📦', color: '#fce7f3', iconColor: '#db2777' },
+  { label: 'Total Facturas', key: 'totalFacturas', Icon: LuClipboardList, color: '#dbeafe', iconColor: '#2563eb' },
+  { label: 'Total Boletas', key: 'totalBoletas', Icon: LuReceiptText, color: '#d1fae5', iconColor: '#059669' },
+  { label: 'Anuladas', key: 'totalAnuladas', Icon: LuCircleX, color: '#fee2e2', iconColor: '#dc2626' },
+  { label: 'Monto Total', key: 'montoTotal', Icon: LuWallet, color: '#fef3c7', iconColor: '#d97706', prefix: 'S/ ' },
+  { label: 'Clientes', key: 'clientes', Icon: LuUsers, color: '#ede9fe', iconColor: '#7c3aed' },
+  { label: 'Productos', key: 'productos', Icon: LuPackage, color: '#fce7f3', iconColor: '#db2777' },
 ];
 
 export default function Dashboard() {
@@ -30,10 +31,12 @@ export default function Dashboard() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
-          <p style={{ color: '#6b7280', marginTop: '4px' }}>Resumen de tu actividad de facturación</p>
+          <p style={{ color: '#888888', marginTop: '4px' }}>Resumen de tu actividad de facturación</p>
         </div>
         <div className="page-actions">
-          <Link to="/facturas/nueva" className="btn btn-primary">➕ Nueva Factura</Link>
+          <Link to="/facturas/nueva" className="btn btn-primary">
+            <LuPlus size={16} style={{ marginRight: 6 }} /> Nueva Factura
+          </Link>
         </div>
       </div>
 
@@ -48,7 +51,9 @@ export default function Dashboard() {
         ) : (
           stats.map((s) => (
             <div key={s.key} className="stat-card">
-              <div className="stat-icon" style={{ background: s.color, color: s.iconColor }}>{s.icon}</div>
+              <div className="stat-icon" style={{ background: s.color, color: s.iconColor }}>
+                <s.Icon size={20} />
+              </div>
               <div className="stat-label">{s.label}</div>
               <div className="stat-value">
                 {s.prefix || ''}
@@ -62,13 +67,17 @@ export default function Dashboard() {
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 600 }}>Facturas recientes</h3>
-          <Link to="/facturas" className="btn btn-link">Ver todas →</Link>
+          <Link to="/facturas" className="btn btn-link">
+            Ver todas <LuArrowRight size={14} style={{ marginLeft: 4 }} />
+          </Link>
         </div>
         {!facturas.length ? (
           <div className="empty-state">
             <h3>Aún no tienes facturas</h3>
             <p>Crea tu primera factura electrónica ahora mismo</p>
-            <Link to="/facturas/nueva" className="btn btn-primary">Crear Factura</Link>
+            <Link to="/facturas/nueva" className="btn btn-primary">
+              <LuPlus size={16} style={{ marginRight: 6 }} /> Crear Factura
+            </Link>
           </div>
         ) : (
           <table className="table">
@@ -99,9 +108,13 @@ export default function Dashboard() {
                   </td>
                   <td>
                     {f.enlace_del_pdf ? (
-                      <a href={f.enlace_del_pdf} target="_blank" rel="noreferrer" className="btn btn-link btn-sm">📄 Ver</a>
+                      <a href={f.enlace_del_pdf} target="_blank" rel="noreferrer" className="btn btn-link btn-sm">
+                        <LuFileText size={14} style={{ marginRight: 4 }} /> Ver
+                      </a>
                     ) : f.enlace ? (
-                      <a href={`${f.enlace}.pdf`} target="_blank" rel="noreferrer" className="btn btn-link btn-sm">📄 Ver</a>
+                      <a href={`${f.enlace}.pdf`} target="_blank" rel="noreferrer" className="btn btn-link btn-sm">
+                        <LuFileText size={14} style={{ marginRight: 4 }} /> Ver
+                      </a>
                     ) : '—'}
                   </td>
                 </tr>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { LuPlus, LuFileText, LuFileCode2, LuRefreshCw, LuTrash2, LuCheck, LuX } from 'react-icons/lu';
 import api from '../lib/api.js';
 
 const TIPO_COMP = { 1: 'Factura', 2: 'Boleta', 3: 'Nota Crédito', 4: 'Nota Débito' };
@@ -29,7 +30,7 @@ function AnularModal({ open, onClose, factura, onSuccess }) {
       <div className="modal" style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3 className="modal-title">Anular Comprobante</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose}><LuX size={22} /></button>
         </div>
         <form onSubmit={submit}>
           <div className="modal-body">
@@ -89,8 +90,12 @@ export default function Facturas() {
       <div className="page-header">
         <h1 className="page-title">Facturas y Boletas</h1>
         <div className="page-actions">
-          <button className="btn btn-secondary" onClick={() => navigate('/facturas/nueva')} style={{ marginRight: 8 }}>➕ Boleta</button>
-          <button className="btn btn-primary" onClick={() => navigate('/facturas/nueva')}>➕ Nueva Factura</button>
+          <button className="btn btn-secondary" onClick={() => navigate('/facturas/nueva')} style={{ marginRight: 8 }}>
+            <LuPlus size={16} style={{ marginRight: 6 }} /> Boleta
+          </button>
+          <button className="btn btn-primary" onClick={() => navigate('/facturas/nueva')}>
+            <LuPlus size={16} style={{ marginRight: 6 }} /> Nueva Factura
+          </button>
         </div>
       </div>
 
@@ -150,7 +155,7 @@ export default function Facturas() {
                     <td style={{ fontWeight: 600 }}>S/ {Number(f.total).toFixed(2)}</td>
                     <td>
                       {f.aceptada_por_sunat ? (
-                        <span className="badge badge-success">✓ Aceptada</span>
+                        <span className="badge badge-success"><LuCheck size={12} style={{ marginRight: 4 }} /> Aceptada</span>
                       ) : (
                         <span className="badge badge-warning">Pendiente</span>
                       )}
@@ -164,17 +169,27 @@ export default function Facturas() {
                     </td>
                     <td className="table-actions">
                       {f.enlace_del_pdf ? (
-                        <a href={f.enlace_del_pdf} target="_blank" rel="noreferrer" className="btn btn-link">📄 PDF</a>
+                        <a href={f.enlace_del_pdf} target="_blank" rel="noreferrer" className="btn btn-link">
+                          <LuFileText size={14} style={{ marginRight: 4 }} /> PDF
+                        </a>
                       ) : f.enlace ? (
-                        <a href={`${f.enlace}.pdf`} target="_blank" rel="noreferrer" className="btn btn-link">📄 PDF</a>
+                        <a href={`${f.enlace}.pdf`} target="_blank" rel="noreferrer" className="btn btn-link">
+                          <LuFileText size={14} style={{ marginRight: 4 }} /> PDF
+                        </a>
                       ) : null}
                       {f.enlace_del_xml && (
-                        <a href={f.enlace_del_xml} target="_blank" rel="noreferrer" className="btn btn-link">📎 XML</a>
+                        <a href={f.enlace_del_xml} target="_blank" rel="noreferrer" className="btn btn-link">
+                          <LuFileCode2 size={14} style={{ marginRight: 4 }} /> XML
+                        </a>
                       )}
                       {!f.anulado && (
                         <>
-                          <button className="btn btn-link" onClick={() => consultarSunat(f)}>🔄 Consultar</button>
-                          <button className="btn btn-link btn-link-danger" onClick={() => setAnularModal(f)}>🗑 Anular</button>
+                          <button className="btn btn-link" onClick={() => consultarSunat(f)}>
+                            <LuRefreshCw size={14} style={{ marginRight: 4 }} /> Consultar
+                          </button>
+                          <button className="btn btn-link btn-link-danger" onClick={() => setAnularModal(f)}>
+                            <LuTrash2 size={14} style={{ marginRight: 4 }} /> Anular
+                          </button>
                         </>
                       )}
                     </td>

@@ -1,12 +1,13 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { LuReceipt, LuLayoutDashboard, LuUsers, LuPackage, LuPlus, LuLogOut } from 'react-icons/lu';
 import useAuthStore from '../store/auth.js';
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-  { path: '/clientes', label: 'Clientes', icon: '👥' },
-  { path: '/productos', label: 'Productos', icon: '📦' },
-  { path: '/facturas', label: 'Facturas', icon: '🧾' },
-  { path: '/facturas/nueva', label: 'Nueva Factura', icon: '➕' },
+  { path: '/dashboard', label: 'Dashboard', Icon: LuLayoutDashboard },
+  { path: '/clientes', label: 'Clientes', Icon: LuUsers },
+  { path: '/productos', label: 'Productos', Icon: LuPackage },
+  { path: '/facturas', label: 'Facturas', Icon: LuReceipt },
+  { path: '/facturas/nueva', label: 'Nueva Factura', Icon: LuPlus },
 ];
 
 export default function Layout() {
@@ -23,15 +24,19 @@ export default function Layout() {
     <div className="sidebar-layout">
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <h1>🧾 Facturador</h1>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <LuReceipt size={20} /> Facturador
+          </h1>
           <p>con NubeFact</p>
         </div>
         <ul className="sidebar-nav">
-          {navItems.map((item) => (
-            <li key={item.path}>
-              <Link to={item.path} className={location.pathname === item.path ? 'active' : ''}>
-                <span className="icon">{item.icon}</span>
-                {item.label}
+          {navItems.map(({ path, label, Icon }) => (
+            <li key={path}>
+              <Link to={path} className={location.pathname === path ? 'active' : ''}>
+                <span className="icon">
+                  <Icon size={18} />
+                </span>
+                {label}
               </Link>
             </li>
           ))}
@@ -47,7 +52,7 @@ export default function Layout() {
               <div className="email">{user?.email}</div>
             </div>
             <button className="btn btn-secondary btn-sm" onClick={() => { logout(); navigate('/login'); }}>
-              Salir
+              <LuLogOut size={14} style={{ marginRight: 6 }} /> Salir
             </button>
           </div>
         </div>

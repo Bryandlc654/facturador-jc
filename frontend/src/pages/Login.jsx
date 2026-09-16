@@ -40,29 +40,62 @@ export default function Login() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h2 className="auth-title">Bienvenido</h2>
-        <p className="auth-subtitle">Inicia sesión en tu cuenta</p>
+        <div style={{ marginBottom: 32 }}>
+          <h2 className="auth-title">Iniciar sesion</h2>
+          <p className="auth-subtitle">Ingresa a tu cuenta para continuar</p>
+        </div>
 
         {error && <div className="alert alert-error">{error}</div>}
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="form-group">
-            <label className="form-label">Email</label>
-            <input className="form-input" type="email" {...register('email')} placeholder="tu@email.com" />
+            <input
+              className="form-input"
+              type="email"
+              {...register('email')}
+              placeholder="Email"
+              style={{ background: '#f7f7f7', border: '1px solid #e5e5e5' }}
+            />
             {errors.email && <p className="form-error">{errors.email.message}</p>}
           </div>
           <div className="form-group">
-            <label className="form-label">Contraseña</label>
-            <input className="form-input" type="password" {...register('password')} placeholder="••••••••" />
+            <input
+              className="form-input"
+              type="password"
+              {...register('password')}
+              placeholder="Contrasena"
+              style={{ background: '#f7f7f7', border: '1px solid #e5e5e5' }}
+            />
             {errors.password && <p className="form-error">{errors.password.message}</p>}
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>
-            {loading ? <span className="spinner" /> : 'Iniciar Sesión'}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              marginTop: 4,
+              padding: '11px 16px',
+              borderRadius: 8,
+              border: 'none',
+              background: '#111111',
+              color: 'white',
+              fontSize: 14,
+              fontWeight: 500,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+          >
+            {loading && <span className="spinner" />}
+            Iniciar Sesion
           </button>
         </form>
 
         <p className="auth-footer">
-          ¿No tienes cuenta? <Link to="/register">Regístrate</Link>
+          No tienes cuenta?{' '}
+          <Link to="/register" style={{ color: '#111', fontWeight: 500 }}>Crea una</Link>
         </p>
       </div>
     </div>

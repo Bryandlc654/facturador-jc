@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { LuPlus, LuX, LuSearch } from 'react-icons/lu';
 import api from '../lib/api.js';
 
 const TIPO_DOC = [
@@ -16,9 +17,12 @@ function ClienteModal({ open, onClose, onSuccess, initial }) {
     direccion: '', email: '', telefono: '',
   });
   const [loading, setLoading] = useState(false);
+  const [consultandoRuc, setConsultandoRuc] = useState(false);
+  const [rucError, setRucError] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
+    setRucError(''); setConsultandoRuc(false);
     if (initial) setForm({ ...form, ...initial });
     else setForm({ tipo_de_documento: '6', numero_de_documento: '', denominacion: '', direccion: '', email: '', telefono: '' });
   }, [initial, open]);
@@ -26,6 +30,22 @@ function ClienteModal({ open, onClose, onSuccess, initial }) {
   if (!open) return null;
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const consultarRuc = async () => {
+    try {
+      setConsultandoRuc(true); setRucError('');
+      const r = await api.post('/sunat/ruc', { ruc: form.numero_de_documento });
+      const d = r.data;
+      setForm(prev => ({
+        ...prev,
+        tipo_de_documento: '6',
+        denominacion: d.nombre_o_razon_social || prev.denominacion,
+        direccion: d.direccion || prev.direccion,
+      }));
+    } catch (err) {
+      setRucError(err.response?.data?.message || 'No se pudo consultar el RUC');
+    } finally { setConsultandoRuc(false); }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -44,7 +64,7 @@ function ClienteModal({ open, onClose, onSuccess, initial }) {
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3 className="modal-title">{initial ? 'Editar Cliente' : 'Nuevo Cliente'}</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose}><LuX size={22} /></button>
         </div>
         <form onSubmit={submit}>
           <div className="modal-body">
@@ -62,6 +82,12 @@ function ClienteModal({ open, onClose, onSuccess, initial }) {
                 <div className="form-group">
                   <label className="form-label">Número</label>
                   <input className="form-input" name="numero_de_documento" value={form.numero_de_documento} onChange={handleChange} required />
+                  {form.tipo_de_documento === '6' && form.numero_de_documento.trim().length === 11 && (
+                    <button type="button" className="btn btn-secondary btn-sm" style={{ marginTop: 6 }} onClick={consultarRuc} disabled={consultandoRuc}>
+                      {consultandoRuc ? <span className="spinner" /> : <LuSearch size={14} style={{ marginRight: 4 }} />} Consultar RUC
+                    </button>
+                  )}
+                  {rucError && <div style={{ color: '#dc2626', fontSize: 13, marginTop: 4 }}>{rucError}</div>}
                 </div>
               </div>
             </div>
@@ -133,8 +159,13 @@ export default function Clientes() {
       <div className="page-header">
         <h1 className="page-title">Clientes</h1>
         <div className="page-actions">
-          <input className="form-input" style={{ width: 260 }} placeholder="🔍 Buscar cliente..." value={search} onChange={(e) => setSearch(e.target.value)} />
-          <button className="btn btn-primary" onClick={() => { setEditing(null); setModalOpen(true); }}>➕ Nuevo Cliente</button>
+          <div style={{ position: 'relative', width: 260 }}>
+            <LuSearch size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#888888' }} />
+            <input className="form-input" style={{ paddingLeft: 36 }} placeholder="Buscar cliente..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <button className="btn btn-primary" onClick={() => { setEditing(null); setModalOpen(true); }}>
+            <LuPlus size={16} style={{ marginRight: 6 }} /> Nuevo Cliente
+          </button>
         </div>
       </div>
 
@@ -145,7 +176,9 @@ export default function Clientes() {
           <div className="empty-state">
             <h3>No hay clientes registrados</h3>
             <p>Agrega tus primeros clientes para empezar a facturar</p>
-            <button className="btn btn-primary" onClick={() => { setEditing(null); setModalOpen(true); }}>Agregar Cliente</button>
+            <button className="btn btn-primary" onClick={() => { setEditing(null); setModalOpen(true); }}>
+              <LuPlus size={16} style={{ marginRight: 6 }} /> Agregar Cliente
+            </button>
           </div>
         ) : (
           <table className="table">

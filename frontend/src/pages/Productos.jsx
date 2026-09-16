@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { LuPlus, LuX, LuSearch } from 'react-icons/lu';
 import api from '../lib/api.js';
 
 const TIPO_IGV = [
@@ -61,7 +62,7 @@ function ProductoModal({ open, onClose, onSuccess, initial }) {
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3 className="modal-title">{initial ? 'Editar Producto' : 'Nuevo Producto / Servicio'}</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose}><LuX size={22} /></button>
         </div>
         <form onSubmit={submit}>
           <div className="modal-body">
@@ -170,8 +171,13 @@ export default function Productos() {
       <div className="page-header">
         <h1 className="page-title">Productos y Servicios</h1>
         <div className="page-actions">
-          <input className="form-input" style={{ width: 260 }} placeholder="🔍 Buscar producto..." value={search} onChange={(e) => setSearch(e.target.value)} />
-          <button className="btn btn-primary" onClick={() => { setEditing(null); setModalOpen(true); }}>➕ Nuevo Producto</button>
+          <div style={{ position: 'relative', width: 260 }}>
+            <LuSearch size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#888888' }} />
+            <input className="form-input" style={{ paddingLeft: 36 }} placeholder="Buscar producto..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <button className="btn btn-primary" onClick={() => { setEditing(null); setModalOpen(true); }}>
+            <LuPlus size={16} style={{ marginRight: 6 }} /> Nuevo Producto
+          </button>
         </div>
       </div>
 
@@ -182,7 +188,9 @@ export default function Productos() {
           <div className="empty-state">
             <h3>No hay productos registrados</h3>
             <p>Agrega tus productos y servicios para usarlos en las facturas</p>
-            <button className="btn btn-primary" onClick={() => { setEditing(null); setModalOpen(true); }}>Agregar Producto</button>
+            <button className="btn btn-primary" onClick={() => { setEditing(null); setModalOpen(true); }}>
+              <LuPlus size={16} style={{ marginRight: 6 }} /> Agregar Producto
+            </button>
           </div>
         ) : (
           <table className="table">
